@@ -3,8 +3,8 @@ import os
 
 
 #input here
-center_letter = "w"
-satellite_letters = ["a", "m", "g", "r", "i", "n"]
+center_letter = "b"
+satellite_letters = ["o", "t", "d", "n", "e", "m"]
 
 
 #constants
@@ -25,9 +25,14 @@ def main(center_letter: str, satellite_letters: list[str]) -> tuple[list[str], l
 
     def is_valid_word(word: str) -> bool:
         """Returns True if a word is a valid guess and False otherwise"""
-        #no punctuation or numbers
-        if "." in word or "-" in word or "'" in word or str(range(10)) in word:
+        #no punctuation
+        if "." in word or "-" in word or "'" in word or "/" in word:
             return False
+        
+        #no numbers
+        for number in range(10):
+            if str(number) in word:
+                return False
 
         #need center letter
         if center_letter not in word:
