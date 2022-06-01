@@ -1,77 +1,86 @@
-"""This file produces a list of possible words and panagrams for a given letter combination from the New York Times Spelling Bee game"""
-import os
+"""This file uses the Selenium library to create a web bot that plays the New York Times Spelling Bee Game and attempts to get a Genius or Queen Bee score
+A copy of the main website will be used, as the original New York Times game is behind a paywall after inputting three guesses
+"""
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
-
-#input here
-center_letter = "b"
-satellite_letters = ["o", "t", "d", "n", "e", "m"]
+from answer_generator import main as create_possible_answers_and_panagrams
+import time
 
 
 #constants
-WORD_FILE_PATH = os.path.join(os.path.dirname(__file__), "english_words.txt")
-MINIMUM_WORD_LENGTH = 4
-MAXIMUM_WORD_LENGTH = 19
+WEBSITE_URL = "https://nytimes-spellingbee.com/"
+SHORT_WAIT_TIME = 0.2 #seconds
+LONG_WAIT_TIME = 5 #seconds
 
 
-def main(center_letter: str, satellite_letters: list[str]) -> tuple[list[str], list[str]]:
-    """Given the center letter and satellite letters for the New York Times Spelling Bee Game, attempts to find all possible words and panagrams"""
-    #final outputs
-    possible_answers = []
-    possible_panagrams = []
+#ChromeDriverManager().install()
+def main() -> None:
+    """Opens a window for the Spelling Bee game and plays the game"""
+    #intialize driver
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
-    alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-    acceptable_letters = [center_letter] + satellite_letters
-    unacceptable_letters = [letter for letter in alphabet if letter not in acceptable_letters]
+    #open website
+    driver.get(WEBSITE_URL)
 
-    def is_valid_word(word: str) -> bool:
-        """Returns True if a word is a valid guess and False otherwise"""
-        #no punctuation
-        if "." in word or "-" in word or "'" in word or "/" in word:
-            return False
-        
-        #no numbers
-        for number in range(10):
-            if str(number) in word:
-                return False
+    #the game window is in a nested iframe, so switch context to the inner frame
+    outer_frame = driver.find_element(By.ID, "iframe_game_play")
+    driver.switch_to.frame(outer_frame)
+    inner_frame = driver.find_element(By.ID, "iframehtml5")
+    driver.switch_to.frame(inner_frame)
 
-        #need center letter
-        if center_letter not in word:
-            return False
-        
-        #can't be too short or too long
-        if len(word) < MINIMUM_WORD_LENGTH or len(word) > MAXIMUM_WORD_LENGTH:
-            return False
-        
-        #no duplicates
-        #TODO is this needed?
-        if word in possible_answers:
-            return False
+    #start the game
+    play_button = WebDriverWait(driver, LONG_WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='portal-game-modals']/div/div/div/div/div/div/div[3]/button")))
+    play_button.click()
 
-        #can only be made of acceptable letters
-        for letter in unacceptable_letters:
-            if letter in word:
-                return False
-        
-        return True
+    #scrape letters of puzzle
+    letters = driver.find_elements(By.CLASS_NAME, "cell-letter")
     
-    #go through the word list and append valid words to answer list
-    with open(WORD_FILE_PATH, "r") as word_file:
-        word_list = [word.lower()[:-1] for word in word_file] #.lower()[:-1] ensures no line breaks or uppercase letters in strings
-
-    #append valid words to answer list
-    for word in word_list:
-        if is_valid_word(word):
-            possible_answers.append(word)
-
-    #search for panagrams in possible answer list
-    for word in possible_answers:
-        if all([letter in word for letter in acceptable_letters]):
-            possible_panagrams.append(word)
+    #center letter is first in DOM
+    #need lowercase letter or create_possible_answers_and_panagrams does not work
+    center_letter = letters[0].text.lower()
     
-    return possible_answers, possible_panagrams
+    #satellite letters are other letters
+    satellite_letters = []
+    for i in range(1, len(letters)):
+        satellite_letters.append(letters[i].text.lower())
+
+    #find out possible words
+    possible_words = create_possible_answers_and_panagrams(center_letter, satellite_letters)[0]
+
+    #input each word
+    actions = ActionChains(driver)
+    for word in possible_words:
+        #check if the Genius screen is up, and if it is, click it
+        try:
+            #this slight pause is needed for the game to register all inputs properly
+            keep_playing_button = WebDriverWait(driver, SHORT_WAIT_TIME).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#portal-game-modals > div > div > div > div > div > div.sb-modal-buttons-section > button")))
+            keep_playing_button.click()
+            time.sleep(LONG_WAIT_TIME) #needed to allow time for popup to close
+
+        #WebDriverWait throws an error if the button is not there so ignore the error
+        except Exception: 
+            pass
+
+        finally:
+            actions.send_keys(word)
+            actions.send_keys(Keys.RETURN)
+            actions.perform()
+    
+    #scrape correct answers from DOM and print to command line
+    answer_guesses = driver.find_elements(By.CLASS_NAME, "sb-anagram")
+    answers = [answer.text.lower() for answer in answer_guesses if answer.text.lower()]
+    print(f"The correct answers are: {answers}")
+
+    #keep window open until user stops it in command line
+    input("Please input something to close the window:")
 
 
 if __name__ == "__main__":
-    possible_answers, possible_panagrams = main(center_letter, satellite_letters)
-    print(f"The possible words are: {possible_answers}")
-    print(f"The possible panagrams are: {possible_panagrams}")
+    main()
