@@ -1,7 +1,6 @@
 # NYT_Spelling_Bee_Solver
-
-THIS PROJECT IS A WORK IN PROGRESS  
-This project allows users to interact with the [New York Times Spelling Bee Game](https://www.nytimes.com/puzzles/spelling-bee). The user can obtain a list of possible answers or launch a Selenium bot that will play the game for them.
+ 
+This project allows users to interact with the [New York Times Spelling Bee Game](https://www.nytimes.com/puzzles/spelling-bee). The user can obtain a list of possible answers or launch a Selenium bot that will play the game for them. Due to the New York Times' paywall, [this website](https://nytimes-spellingbee.com/) is used instead.
 
 ## Installation Steps
 
@@ -23,21 +22,19 @@ Unix/macOS:
 ```bash
 python -m pip install -r requirements.txt
 ```
-
+### 4\. Install Chrome Webdriver
+Go to [this website](https://sites.google.com/chromium.org/driver/) and download Chrome Webdriver onto your machine.
 ## Usage
 
-### main.py
+### answer_geneator.py
 Input the central letter into "central_letter" and the remaining 6 letters into "satellite_letters". Then, run the program to obtain a list of possible answers and panagrams.
 
 ### Selenium_Bot.py  
-WORK IN PROGRESS
+Run the program to launch the Selenium bot. The bot will then play the game and input all possible guesses into the game. Then, it will print all correct answers onto the command line. Input anything into the command line to close the game window.
 
 ## Contributing
 Pull requests are welcome.  
 If you have access to a database of all possible answers to the game (as some websites seem to have), please email me at patelrudra2003@gmail.com.
-
-## Upcoming Features
-The Selenium Bot will be added shortly.  
 
 ## License
 
