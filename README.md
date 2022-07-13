@@ -32,7 +32,7 @@ python -m pip install -r requirements.txt
 ### 4\. Install Chrome Webdriver
 Go to [this website](https://sites.google.com/chromium.org/driver/) and download Chrome Webdriver onto your machine.
 
-### answer_geneator.py
+### answer_generator.py
 Input the central letter into "central_letter" and the remaining 6 letters into "satellite_letters". Then, run the program to obtain a list of possible answers and panagrams.
 
 ### Selenium_Bot.py  
