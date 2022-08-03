@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-<h2 align="center">Obtain a list of possible answers to the <a href="https://www.nytimes.com/puzzles/spelling-bee">New York Times Spelling Bee Game</a> or launch a Selenium bot that will play the game for you on <a href="https://nytimes-spellingbee.com">different website</a> (due to paywalls).</h2>
+<h2 align="center">Obtain a list of possible answers to the <a href="https://www.nytimes.com/puzzles/spelling-bee">New York Times Spelling Bee Game</a> or launch a Selenium bot that will play the game for you on a <a href="https://nytimes-spellingbee.com">different website</a> (due to paywalls).</h2>
 
 https://user-images.githubusercontent.com/85089368/178854082-9d66120f-cba6-4022-916b-17477a08488d.mp4
 
